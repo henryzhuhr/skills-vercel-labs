@@ -15,6 +15,7 @@ import { runSync, parseSyncOptions } from './sync.ts';
 import { runVerify } from './verify.ts';
 import { runValidate } from './validate.ts';
 import { runStatus } from './status.ts';
+import { runGroups } from './groups-command.ts';
 import { track } from './telemetry.ts';
 import { fetchSkillFolderHash, getGitHubToken } from './skill-lock.ts';
 
@@ -100,6 +101,9 @@ function showBanner(): void {
     `  ${DIM}$${RESET} ${TEXT}npx skills validate${RESET}              ${DIM}Validate skill metadata${RESET}`
   );
   console.log(
+    `  ${DIM}$${RESET} ${TEXT}npx skills groups${RESET}              ${DIM}Manage skill groups${RESET}`
+  );
+  console.log(
     `  ${DIM}$${RESET} ${TEXT}npx skills init ${DIM}[name]${RESET}          ${DIM}Create a new skill${RESET}`
   );
   console.log(
@@ -132,6 +136,14 @@ ${BOLD}Updates:${RESET}
 ${BOLD}Authoring:${RESET}
   validate [path]      Validate skill metadata (alias: lint)
   init [name]          Initialize a skill (creates <name>/SKILL.md or ./SKILL.md)
+
+${BOLD}Groups:${RESET}
+  groups               Manage skill groups
+  groups show <group>  Show group details
+  groups create <name> Create a new group (-d "description")
+  groups add <g> <s>   Add a skill to a group
+  groups remove <g> <s> Remove a skill from a group
+  groups delete <name> Delete a group
 
 ${BOLD}Project:${RESET}
   ci                   Restore skills from skills-lock.json (alias: experimental_install)
@@ -713,6 +725,10 @@ async function main(): Promise<void> {
       break;
     case 'verify':
       await runVerify(restArgs);
+      break;
+    case 'groups':
+    case 'group':
+      await runGroups(restArgs);
       break;
     case 'check':
       runCheck(restArgs);
