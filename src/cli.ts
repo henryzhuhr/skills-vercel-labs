@@ -13,6 +13,7 @@ import { runList } from './list.ts';
 import { removeCommand, parseRemoveOptions } from './remove.ts';
 import { runSync, parseSyncOptions } from './sync.ts';
 import { runVerify } from './verify.ts';
+import { runValidate } from './validate.ts';
 import { track } from './telemetry.ts';
 import { fetchSkillFolderHash, getGitHubToken } from './skill-lock.ts';
 
@@ -95,6 +96,9 @@ function showBanner(): void {
     `  ${DIM}$${RESET} ${TEXT}npx skills verify${RESET}                ${DIM}Verify installed skills match lockfile${RESET}`
   );
   console.log(
+    `  ${DIM}$${RESET} ${TEXT}npx skills validate${RESET}              ${DIM}Validate skill metadata${RESET}`
+  );
+  console.log(
     `  ${DIM}$${RESET} ${TEXT}npx skills init ${DIM}[name]${RESET}          ${DIM}Create a new skill${RESET}`
   );
   console.log(
@@ -123,10 +127,13 @@ ${BOLD}Updates:${RESET}
   check                Check for available skill updates
   update               Update all skills to latest versions
 
+${BOLD}Authoring:${RESET}
+  validate [path]      Validate skill metadata (alias: lint)
+  init [name]          Initialize a skill (creates <name>/SKILL.md or ./SKILL.md)
+
 ${BOLD}Project:${RESET}
   ci                   Restore skills from skills-lock.json (alias: experimental_install)
   verify               Verify installed skills match lockfile hashes
-  init [name]          Initialize a skill (creates <name>/SKILL.md or ./SKILL.md)
   experimental_sync    Sync skills from node_modules into agent directories
 
 ${BOLD}Add Options:${RESET}
@@ -237,6 +244,10 @@ function runInit(args: string[]): void {
   const skillContent = `---
 name: ${skillName}
 description: A brief description of what this skill does
+author: your-name-or-org
+license: MIT
+# repository: https://github.com/owner/repo
+# keywords: [topic1, topic2]
 ---
 
 # ${skillName}
@@ -682,6 +693,13 @@ async function main(): Promise<void> {
       showLogo();
       const { options: syncOptions } = parseSyncOptions(restArgs);
       await runSync(restArgs, syncOptions);
+      break;
+    }
+    case 'validate':
+    case 'lint': {
+      showLogo();
+      console.log();
+      await runValidate(restArgs);
       break;
     }
     case 'list':
